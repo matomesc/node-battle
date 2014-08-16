@@ -1,4 +1,4 @@
-# node-battle
+# node-battle ![buildstatus](https://travis-ci.org/matomesc/node-battle.svg?branch=master)
 
 `node-battle` is a client for Blizzard's World of Warcraft Community Web API.
 
