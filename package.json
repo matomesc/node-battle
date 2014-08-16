@@ -1,0 +1,39 @@
+{
+  "name": "battle",
+  "version": "0.0.1",
+  "description": "client for battle.net world of warcraft api",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/jasmine-node --color --verbose test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/matomesc/battle"
+  },
+  "keywords": [
+    "world",
+    "of",
+    "warcraft",
+    "battle.net",
+    "wow",
+    "world",
+    "warcraft",
+    "battle",
+    "blizzard",
+    "client",
+    "api",
+    "json"
+  ],
+  "author": "Mihai Tomescu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matomesc/battle/issues"
+  },
+  "homepage": "https://github.com/matomesc/battle",
+  "dependencies": {
+    "request": "^2.40.0"
+  },
+  "devDependencies": {
+    "jasmine-node": "^1.14.5"
+  }
+}
