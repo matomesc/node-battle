@@ -53,8 +53,6 @@ Client.prototype._request = function (options, callback) {
 		qs: options.params
 	};
 
-	console.log('reqOptions:', reqOptions);
-
 	return request(reqOptions, function (err, res, body) {
 		if (err) {
 			return callback(err);
