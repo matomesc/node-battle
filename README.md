@@ -22,7 +22,11 @@ client.item({ id: 72095 }, function (err, item) {
 });
 
 // load a character from a US realm
-client.character({ region: 'us', realm: 'nesingwary', name: 'havøk' }, function (err, char) {
+client.character({
+    region: 'us',
+    realm: 'nesingwary',
+    name: 'havøk'
+}, function (err, char) {
     console.log(char);
 });
 
@@ -51,7 +55,7 @@ Options:
 
 - `options.region` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
 
-The client supports all endpoints found on Blizzard's API docs: `http://blizzard.github.io/api-wow-docs/`.
+The client supports all endpoints found on [Blizzard's API docs](http://blizzard.github.io/api-wow-docs/).
 
 The following list shows all the endpoints and parameters supported. They should all be called with `(params, callback)`. 
 
