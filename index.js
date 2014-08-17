@@ -50,7 +50,11 @@ Client.prototype._request = function (options, callback) {
 	var reqOptions = {
 		method: options.method,
 		url: options.url,
-		qs: options.params
+		qs: options.params,
+		encoding: 'utf8',
+		headers: {
+			'Accept': 'application/json;charset=utf-8'
+		}
 	};
 
 	return request(reqOptions, function (err, res, body) {
@@ -59,17 +63,17 @@ Client.prototype._request = function (options, callback) {
 		}
 
 		try {
-			body = JSON.parse(body);
+			var parsedBody = JSON.parse(body);
 		} catch (e) {
 			return callback(new Error('invalid json: ' + body));
 		}
 
-		if (body.status === 'nok' || res.statusCode >= 400) {
-			err = new APIError(res.statusCode, body);
+		if (parsedBody.status === 'nok' || res.statusCode >= 400) {
+			err = new APIError(res.statusCode, parsedBody);
 			return callback(err);
 		}
 
-		return callback(null, body);
+		return callback(null, parsedBody);
 	});
 };
 
