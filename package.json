@@ -1,6 +1,6 @@
 {
   "name": "battle",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "node-battle is a client for Blizzard's World of Warcraft Community Web API",
   "main": "index.js",
   "scripts": {
