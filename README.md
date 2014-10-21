@@ -44,11 +44,6 @@ client.item({ id: 99999999 }, function (err, item) {
 
 ### `battle.createClient([options])`
 
-Options:
-See below.
-
-Create a new client.
-
 ### `battle.Client([options])`
 
 Options:
