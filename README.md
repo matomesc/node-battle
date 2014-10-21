@@ -45,16 +45,14 @@ client.item({ id: 99999999 }, function (err, item) {
 ### `battle.createClient([options])`
 
 Options:
-
 See below.
 
-Returns a new client.
+Create a new client.
 
 ### `battle.Client([options])`
 
 Options:
 
-- required parameters required to build the url for the endpoint (see below)
 - `[options.region]` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
 
 #### Endpoints
