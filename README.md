@@ -25,7 +25,8 @@ client.item({ id: 72095 }, function (err, item) {
 client.character({
     region: 'us',
     realm: 'nesingwary',
-    name: 'havøk'
+    name: 'havøk',
+    fields: 'stats'
 }, function (err, char) {
     console.log(char);
 });
@@ -45,7 +46,7 @@ client.item({ id: 99999999 }, function (err, item) {
 
 Options:
 
-- `options.region` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
+See below.
 
 Returns a new client.
 
@@ -53,13 +54,30 @@ Returns a new client.
 
 Options:
 
-- `options.region` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
+- required parameters required to build the url for the endpoint (see below)
+- `[options.region]` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
+
+#### Endpoints
 
 The client supports all endpoints found on [Blizzard's API docs](http://blizzard.github.io/api-wow-docs/).
 
-The following list shows all the endpoints and parameters supported. They should all be called with `(params, callback)`. 
+Sending a request to the `character` endpoint:
 
-**Note:** Passing in `params.region` will override the client's default region.
+```
+client.character({
+    region: 'us',            // optional param
+    realm: 'nesingwary',     // required param
+    name: 'havøk',           // required param
+    fields: 'stats'          // optional param
+}, function (err, data) {
+    // do your thing
+})
+```
+**Note:** Passing in `params.region` will override the client's default region.  
+**Note:** all request parameters that are not required to build the url (such as `fields` in the example above) will be sent
+to the API as query string parameters.
+
+Available endpoints and their required parameters:
 
 ```js
 achievement      : '/api/wow/achievement/:id',
