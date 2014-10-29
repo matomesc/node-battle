@@ -50,8 +50,6 @@ client.item({ id: 99999999 }, function (err, item) {
 
 ### `battle.createClient([options])`
 
-### `battle.Client([options])`
-
 Options:
 
 - `options.apiKey` - **required**
