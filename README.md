@@ -48,14 +48,16 @@ client.item({ id: 99999999 }, function (err, item) {
 
 ## API
 
-### `battle.createClient([options])`
+### `battle.createClient(options)`
 
 Options:
 
 - `options.apiKey` - **required**
 - `[options.region]` - optional, defaults to `us`. Supports: `us`, `eu`, `kr`, `tw`, `ch`
 
-### `battle.endpoint(params, callback)`
+Returns: an instance of `battle.Client`
+
+### `client.endpoint(params, callback)`
 
 The client supports all endpoints found on [Blizzard's API docs](http://blizzard.github.io/api-wow-docs/).
 
@@ -107,6 +109,8 @@ itemClasses      : '/api/wow/data/item/classes',
 talents          : '/api/wow/data/talents',
 petTypes         : '/api/wow/data/pet/types'
 ```
+
+### `battle.Client(options)`
 
 ### `battle.APIError(statusCode, body)`
 
