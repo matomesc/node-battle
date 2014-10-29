@@ -148,7 +148,7 @@ Object.keys(Client.paths).forEach(function (name) {
 		delete params.region;
 
 		// set api key
-		params.apiKey = params.apiKey || this._apiKey;
+		params.apikey = params.apiKey || this._apiKey;
 
 		// replace :params in path with urlencoded values
 		Object.keys(params).forEach(function (key) {
