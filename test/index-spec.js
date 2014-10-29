@@ -1,4 +1,5 @@
 var battle = require('../index');
+var config = require('./config');
 
 process.on('uncaughtException', function (err) {
 	console.log(err.stack);
@@ -6,21 +7,30 @@ process.on('uncaughtException', function (err) {
 });
 
 describe('client', function () {
-	var client = battle.createClient();	
+	var client = battle.createClient({
+		apiKey: config.apiKey
+	});
 	it('should set a default region if none passed in', function (done) {
-		var client = battle.createClient();
+		var client = battle.createClient({
+			apiKey: config.apiKey
+		});
 		expect(client._region).toBe('us');
 		return done();
 	});
 	it('should use passed in region as default', function (done) {
-		var client = battle.createClient({ region: 'eu' });
+		var client = battle.createClient({
+			apiKey: config.apiKey,
+			region: 'eu'
+		});
 		expect(client._region).toBe('eu');
 		return done();
 	});
 	it('auction()', function (done) {
-		client.auction({ region: 'eu', realm: 'aegwynn' }, function (err, data) {
-			expect(err).toBeFalsy();
-			expect(typeof data).toBe('object');
+		client.auction({ region: 'eu', realm: 'medivh' }, function (err, data) {
+			if (err) {
+				return done(err);
+			}
+			expect(data).toBeTruthy();
 			expect(Array.isArray(data.files)).toBe(true);
 			return done();
 		});
@@ -54,8 +64,17 @@ describe('client', function () {
 	});
 	it('character()', function (done) {
 		client.character({ realm: 'nesingwary', name: 'havøk' }, function (err, data) {
-			console.log(err, data);
+			expect(err).toBeFalsy();
+			expect(data).toBeTruthy();
 			done();
 		});
 	});
+	it('guild()', function (done) {
+		client.guild({ region: 'eu', realm: 'twisting-nether', name: 'Method', fields: 'members' }, function (err, data) {
+			expect(err).toBeFalsy();
+			expect(typeof data).toBe('object');
+			console.log(err, data);
+			return done();
+		});
+	})
 });

@@ -2,7 +2,7 @@
 
 `node-battle` is a client for Blizzard's World of Warcraft Community Web API.
 
-## Installation
+## Install
 
 ```
 npm install battle
@@ -10,11 +10,17 @@ npm install battle
 
 ## Usage
 
+First you need an API key so head to the [developer portal](https://dev.battle.net/)
+and [register an application](https://dev.battle.net/apps/register).
+
 ```js
 var battle = require('battle');
 
 // create a new client with a default region
-var client = battle.createClient({ region: 'eu' });
+var client = battle.createClient({
+    apiKey: '...',
+    region: 'eu'
+});
 
 // load an item
 client.item({ id: 72095 }, function (err, item) {
@@ -48,9 +54,10 @@ client.item({ id: 99999999 }, function (err, item) {
 
 Options:
 
-- `[options.region]` (defaults to `us`, supports `us`, `eu`, `kr`, `tw`, `ch`)
+- `options.apiKey` - **required**
+- `[options.region]` - optional, defaults to `us`. Supports: `us`, `eu`, `kr`, `tw`, `ch`
 
-#### Endpoints
+### `battle.endpoint(params, callback)`
 
 The client supports all endpoints found on [Blizzard's API docs](http://blizzard.github.io/api-wow-docs/).
 
@@ -105,4 +112,4 @@ petTypes         : '/api/wow/data/pet/types'
 
 ### `battle.APIError(statusCode, body)`
 
-The error class used for API errors. `err.statusCode` and `err.message` are populated from the response.
+The error class used for API errors. `err.statusCode`, `err.message` and `err.body` are populated from the response.

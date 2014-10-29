@@ -28,3 +28,6 @@ node_modules
 .lock-wscript
 
 .idea
+
+# contains api key
+test/config.js

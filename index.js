@@ -22,9 +22,14 @@ APIError.prototype.toString = function () {
 /**
  * @class Client
  * @param {Object} options
+ * @param {String} options.apiKey
  * @constructor
  */
 function Client(options) {
+	if (!options.apiKey) {
+		throw new Error('options.apiKey is required')
+	}
+
 	/**
 	 * Default region.
 	 *
@@ -33,6 +38,7 @@ function Client(options) {
 	 * @private
 	 */
 	this._region = options.region || 'us';
+	this._apiKey = options.apiKey;
 }
 
 /**
@@ -65,7 +71,8 @@ Client.prototype._request = function (options, callback) {
 		try {
 			var parsedBody = JSON.parse(body);
 		} catch (e) {
-			return callback(new Error('invalid json: ' + body));
+			var msg = 'invalid json: ' + body.toString().slice(0, 200);
+			return callback(new Error(msg));
 		}
 
 		if (parsedBody.status === 'nok' || res.statusCode >= 400) {
@@ -132,14 +139,18 @@ Object.keys(Client.paths).forEach(function (name) {
 			callback = params;
 			params = {};
 		}
-
+		// determine host based on region
 		var region = params.region || this._region;
 		var host = Client.hosts[region];
 		var path = Client.paths[name];
 
+		// not an actual param
 		delete params.region;
 
-		// replace :placeholders in path with urlencoded values
+		// set api key
+		params.apiKey = params.apiKey || this._apiKey;
+
+		// replace :params in path with urlencoded values
 		Object.keys(params).forEach(function (key) {
 			var str = ':' + key;
 			var val = encodeURIComponent(params[key]);
@@ -149,7 +160,7 @@ Object.keys(Client.paths).forEach(function (name) {
 			}
 		});
 
-		var url = 'http://' + host + path;
+		var url = 'https://' + host + path;
 		var options = {
 			method: 'GET',
 			url: url,
