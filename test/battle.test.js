@@ -1,9 +1,19 @@
 var assert = require('chai').assert;
 var battle = require('../index');
-var config = require('./config');
+
+// find api key
+var apiKey;
+try {
+	apiKey = require('./config').apiKey;
+} catch (e) {
+	apiKey = process.env.BATTLENET_API_KEY;
+	if (!apiKey) {
+		throw new Error('no valid api key found');
+	}
+}
 
 var client = battle.createClient({
-	apiKey: config.apiKey || process.env.BATTLENET_API_KEY
+	apiKey: apiKey
 });
 
 describe('battle.createClient()', function () {
