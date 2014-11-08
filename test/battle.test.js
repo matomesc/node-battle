@@ -3,7 +3,7 @@ var battle = require('../index');
 var config = require('./config');
 
 var client = battle.createClient({
-	apiKey: config.apiKey
+	apiKey: config.apiKey || process.env.BATTLENET_API_KEY
 });
 
 describe('battle.createClient()', function () {
@@ -106,6 +106,7 @@ describe('client.realm()', function () {
 			assert(!err);
 			assert(typeof data === 'object');
 			assert(Array.isArray(data.realms));
+			done();
 		});
 	});
 });
