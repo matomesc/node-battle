@@ -23,11 +23,13 @@ APIError.prototype.toString = function () {
  * @class Client
  * @param {Object} options
  * @param {String} options.apiKey
+ * @param {String} [options.region='us']
+ * @param {String} [options.locale='en_US']
  * @constructor
  */
 function Client(options) {
 	if (!options.apiKey) {
-		throw new Error('options.apiKey is required')
+		throw new Error('options.apiKey is required');
 	}
 
 	/**
@@ -38,25 +40,70 @@ function Client(options) {
 	 * @private
 	 */
 	this._region = options.region || 'us';
+
+	/**
+	 * Default API key.
+	 *
+	 * @property _apiKey
+	 * @type String
+	 * @private
+	 */
 	this._apiKey = options.apiKey;
+
+	/**
+	 * Default locale.
+	 *
+	 * @property _locale
+	 * @type String
+	 * @private
+	 */
+	this._locale = 'en_US';
 }
 
 /**
  * @method _request
- * @param {Object}   options
- * @param {String}   options.method
- * @param {String}   options.url
- * @param {Object}   options.params
+ * @param {String}   resource
+ * @param {Object}   params
+ * @param {String}   [params.region]
+ * @param {String}   [params.apiKey]
+ * @param {String}   [params.locale]
  * @param {Function} callback
  * @returns {Request}
  * @private
  */
-Client.prototype._request = function (options, callback) {
+Client.prototype._request = function (resource, params, callback) {
 	var self = this;
+
+	// determine host based on region
+	var region = params.region || self._region;
+	var host = Client.hosts[region];
+	var path = Client.paths[resource];
+
+	// not an actual param
+	delete params.region;
+
+	// set api key
+	params.apikey = params.apikey || params.apiKey || self._apiKey;
+	delete params.apiKey;
+
+	// set locale
+	params.locale = params.locale || self._locale;
+
+	// replace :params in path with urlencoded values
+	Object.keys(params).forEach(function (key) {
+		var str = ':' + key;
+		var val = encodeURIComponent(params[key]);
+		if (path.indexOf(str) !== -1) {
+			path = path.replace(str, val, 'ig');
+			delete params[key];
+		}
+	});
+
+	var url = 'https://' + host + path;
 	var reqOptions = {
-		method: options.method,
-		url: options.url,
-		qs: options.params,
+		method: 'GET',
+		url: url,
+		qs: params,
 		encoding: 'utf8',
 		headers: {
 			'Accept': 'application/json;charset=utf-8'
@@ -77,10 +124,11 @@ Client.prototype._request = function (options, callback) {
 
 		if (parsedBody.status === 'nok' || res.statusCode >= 400) {
 			err = new APIError(res.statusCode, parsedBody);
+			err.res = res;
 			return callback(err);
 		}
 
-		return callback(null, parsedBody);
+		return callback(null, parsedBody, res);
 	});
 };
 
@@ -90,11 +138,11 @@ Client.prototype._request = function (options, callback) {
  * @static
  */
 Client.hosts = {
-	us: 'us.battle.net',
-	eu: 'eu.battle.net',
-	kr: 'kr.battle.net',
-	tw: 'tw.battle.net',
-	ch: 'www.battlenet.com.cn'
+	us: 'us.api.battle.net',
+	eu: 'eu.api.battle.net',
+	//kr: 'kr.battle.net',
+	//tw: 'tw.battle.net',
+	//ch: 'www.battlenet.com.cn'
 };
 
 /**
@@ -103,34 +151,51 @@ Client.hosts = {
  * @static
  */
 Client.paths = {
-	achievement      : '/api/wow/achievement/:id',
-	auction          : '/api/wow/auction/data/:realm',
-	battlePetAbility : '/api/wow/battlePet/ability/:id',
-	battlePetSpecies : '/api/wow/battlePet/species/:id',
-	battlePetStats   : '/api/wow/battlePet/stats/:id',
-	challengeRealm   : '/api/wow/challenge/:realm',
-	challengeRegion  : '/api/wow/challenge/region',
-	character        : '/api/wow/character/:realm/:name',
-	item             : '/api/wow/item/:id',
-	itemSet          : '/api/wow/item/set/:id',
-	guild            : '/api/wow/guild/:realm/:name',
-	arenaTeam        : '/api/wow/arena/:realm/:size/:name', // size=2v2, 3v3, 5v5
-	arenaLadder      : '/api/wow/pvp/arena/:battlegroup/:size',
-	ratedBg          : '/api/wow/pvp/ratedbg/ladder',
-	quest            : '/api/wow/quest/:id',
-	realm            : '/api/wow/realm/status',
-	recipe           : '/api/wow/recipe/:id',
-	spell            : '/api/wow/spell/:id',
-	battlegroups     : '/api/wow/data/battlegroups/',
-	races            : '/api/wow/data/character/races',
-	classes          : '/api/wow/data/character/classes',
-	achievements     : '/api/wow/data/character/achievements',
-	guildRewards     : '/api/wow/data/guild/rewards',
-	guildPerks       : '/api/wow/data/guild/perks',
-	guildAchievements: '/api/wow/data/guild/achievements',
-	itemClasses      : '/api/wow/data/item/classes',
-	talents          : '/api/wow/data/talents',
-	petTypes         : '/api/wow/data/pet/types'
+	achievement      : '/wow/achievement/:id',
+	auction          : '/wow/auction/data/:realm',
+
+	battlePetAbility : '/wow/battlePet/ability/:id',
+	battlePetSpecies : '/wow/battlePet/species/:id',
+
+	// query params:
+	// - level: optional, default 1, max 25
+	// - breedId: optional, default 3
+	// - qualityId: optional pet quality, min 0 (poor), max 6 (legendary), default 1
+	battlePetStats   : '/wow/battlePet/stats/:id',
+
+	challengeRealm   : '/wow/challenge/:realm',
+	challengeRegion  : '/wow/challenge/region',
+
+	// query params:
+	// - fields: optional comma separated list of what to include in response
+	//     [achievements, appearance, feed, guild, hunterPets, items, mounts,
+	//  	pets, petSlots, progression, pvp, quests, reputation, stats, talents,
+	//  	titles, audit]
+	//
+	character        : '/wow/character/:realm/:name',
+
+	item             : '/wow/item/:id',
+	itemSet          : '/wow/item/set/:id',
+
+	// query params:
+	// - fields: comma separated list of what to include in response (eg. `achievements,members,news,challenge`)
+	guild            : '/wow/guild/:realm/:name',
+
+	pvpLeaderboards  : '/wow/pvp/leaderboards/:bracket', // where bracket can be 2v2, 3v3, 5v5 or rbg
+	quest            : '/wow/quest/:id',
+	realm            : '/wow/realm/status',
+	recipe           : '/wow/recipe/:id',
+	spell            : '/wow/spell/:id',
+	battlegroups     : '/wow/data/battlegroups/',
+	races            : '/wow/data/character/races',
+	classes          : '/wow/data/character/classes',
+	achievements     : '/wow/data/character/achievements',
+	guildRewards     : '/wow/data/guild/rewards',
+	guildPerks       : '/wow/data/guild/perks',
+	guildAchievements: '/wow/data/guild/achievements',
+	itemClasses      : '/wow/data/item/classes',
+	talents          : '/wow/data/talents',
+	petTypes         : '/wow/data/pet/types'
 };
 
 Object.keys(Client.paths).forEach(function (name) {
@@ -139,35 +204,7 @@ Object.keys(Client.paths).forEach(function (name) {
 			callback = params;
 			params = {};
 		}
-		// determine host based on region
-		var region = params.region || this._region;
-		var host = Client.hosts[region];
-		var path = Client.paths[name];
-
-		// not an actual param
-		delete params.region;
-
-		// set api key
-		params.apikey = params.apiKey || this._apiKey;
-
-		// replace :params in path with urlencoded values
-		Object.keys(params).forEach(function (key) {
-			var str = ':' + key;
-			var val = encodeURIComponent(params[key]);
-			if (path.indexOf(str) !== -1) {
-				path = path.replace(str, val, 'ig');
-				delete params[key];
-			}
-		});
-
-		var url = 'https://' + host + path;
-		var options = {
-			method: 'GET',
-			url: url,
-			params: params
-		};
-
-		return this._request(options, callback);
+		return this._request(name, params, callback);
 	};
 });
 

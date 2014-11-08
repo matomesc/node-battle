@@ -4,7 +4,7 @@
   "description": "node-battle is a client for Blizzard's World of Warcraft Community Web API",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/jasmine-node --color --verbose test/"
+    "test": "./node_modules/.bin/mocha -R spec -t 10000 -s 400 --colors --check-leaks test/*.test.js"
   },
   "repository": {
     "type": "git",
@@ -31,9 +31,10 @@
   },
   "homepage": "https://github.com/matomesc/battle",
   "dependencies": {
+    "chai": "^1.9.2",
     "request": "^2.40.0"
   },
   "devDependencies": {
-    "jasmine-node": "^1.14.5"
+    "mocha": "^2.0.1"
   }
 }
