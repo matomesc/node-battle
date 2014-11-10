@@ -7,12 +7,23 @@ var request = require('request');
  * @constructor
  * @extends Error
  */
-function APIError(statusCode, body) {
+function APIError(url, statusCode, body) {
 	Error.call(this);
 	Error.captureStackTrace(this, APIError);
+	this.url = url;
 	this.statusCode = statusCode;
-	this.body = body;
-	this.message = body && body.reason ? body.reason : 'Unknown API Error';
+	this.message = 'Unknown API Error: ' + JSON.stringify(body);
+
+	// try to find a better error message
+	if (body) {
+		if (body.status === 'nok') {
+			// old api errors
+			this.message = body.reason;
+		} else if (body.code) {
+			// new api errors
+			this.message = body.detail;
+		}
+	}
 }
 APIError.prototype.toString = function () {
 	return this.message + '(statusCode=' + this.statusCode +
@@ -105,8 +116,9 @@ Client.prototype._request = function (resource, params, callback) {
 		url: url,
 		qs: params,
 		encoding: 'utf8',
+		gzip: true,
 		headers: {
-			'Accept': 'application/json;charset=utf-8'
+			'Accept': 'application/json'
 		}
 	};
 
@@ -118,13 +130,14 @@ Client.prototype._request = function (resource, params, callback) {
 		try {
 			var parsedBody = JSON.parse(body);
 		} catch (e) {
-			var msg = 'invalid json: ' + body.toString().slice(0, 200);
-			return callback(new Error(msg));
+			err = new Error('Bad response JSON');
+			err.url = res.request.href;
+			err.body = body;
+			return callback(err);
 		}
 
-		if (parsedBody.status === 'nok' || res.statusCode >= 400) {
-			err = new APIError(res.statusCode, parsedBody);
-			err.res = res;
+		if (res.statusCode >= 400) {
+			err = new APIError(res.request.href, res.statusCode, parsedBody);
 			return callback(err);
 		}
 

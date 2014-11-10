@@ -51,7 +51,8 @@ describe('client.auction()', function () {
 		client.auction({ realm: 'askdasda' }, function (err, data) {
 			assert(err);
 			assert(err instanceof battle.APIError);
-			assert(err.res.statusCode === 404);
+			assert(err.statusCode === 404);
+			assert(err.url.indexOf('https://us.api.battle.net/wow/auction/data/askdasda') === 0);
 			assert(!data);
 			done();
 		});
